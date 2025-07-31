@@ -32,7 +32,7 @@ export class ApiClient {
       this.baseUrl = 'http://mcp-backend:5311/api';
     } else {
       // サーバー環境 (Next.jsのAPIルートなど)
-      this.baseUrl = process.env.NEXT_PUBLIC_API_BASE_URL || 'http://localhost:5311/api';
+      this.baseUrl = (typeof globalThis !== 'undefined' && globalThis.process?.env?.NEXT_PUBLIC_API_BASE_URL) || 'http://localhost:5311/api';
     }
     console.log('API Client initialized with baseUrl:', this.baseUrl);
   }
@@ -148,7 +148,13 @@ export class ApiClient {
    * 設定を取得
    */
   async getConfig(): Promise<any> {
-    return this.fetchApi<any>('/config');
+    try {
+      const result = await this.fetchApi<any>('/config');
+      return result;
+    } catch (error) {
+      console.error('Failed to get config:', error);
+      throw error;
+    }
   }
 
   /**
@@ -156,19 +162,31 @@ export class ApiClient {
    * @param config 設定
    */
   async updateConfig(config: any): Promise<any> {
-    return this.fetchApi<any>('/config', {
-      method: 'PUT',
-      body: JSON.stringify(config),
-    });
+    try {
+      const result = await this.fetchApi<any>('/config', {
+        method: 'PUT',
+        body: JSON.stringify(config),
+      });
+      return result;
+    } catch (error) {
+      console.error('Failed to update config:', error);
+      throw error;
+    }
   }
 
   /**
    * 設定をバックアップ
    */
   async backupConfig(): Promise<any> {
-    return this.fetchApi<any>('/config/backup', {
-      method: 'POST',
-    });
+    try {
+      const result = await this.fetchApi<any>('/config/backup', {
+        method: 'POST',
+      });
+      return result;
+    } catch (error) {
+      console.error('Failed to backup config:', error);
+      throw error;
+    }
   }
 
   /**

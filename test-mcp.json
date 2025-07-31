@@ -1,0 +1,38 @@
+{
+  "mcpServers": {
+    "test-mcp-server": {
+      "image": "test-mcp-server:latest",
+      "ports": [
+        {
+          "host": 3001,
+          "container": 3001,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": {
+        "NODE_ENV": "production",
+        "MCP_PORT": "3001"
+      },
+      "volumes": [
+        {
+          "host": "./data",
+          "container": "/app/data",
+          "mode": "rw"
+        }
+      ]
+    },
+    "another-server": {
+      "image": "another-mcp-server:latest",
+      "ports": [
+        {
+          "host": 3002,
+          "container": 3002,
+          "protocol": "tcp"
+        }
+      ],
+      "environment": {
+        "NODE_ENV": "development"
+      }
+    }
+  }
+}

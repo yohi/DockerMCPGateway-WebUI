@@ -10,7 +10,7 @@ services:
     environment:
       - NODE_ENV=production
       - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
-      - CONFIG_PATH=/app/config
+      - CONFIG_PATH=/app/config/config.json
       - NEXT_PUBLIC_API_BASE_URL=http://mcp-backend:5311/api
       - API_BASE_URL=http://mcp-backend:5311/api
     volumes:
@@ -41,7 +41,7 @@ services:
       - NODE_ENV=production
       - PORT=5311
       - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
-      - CONFIG_PATH=/app/config
+      - CONFIG_PATH=/app/config/config.json
     volumes:
       - ./config:/app/config
       - ./src:/app/src

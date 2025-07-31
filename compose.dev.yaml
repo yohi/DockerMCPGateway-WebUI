@@ -3,6 +3,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    ports:
+      - "3000:5310"
     volumes:
       - ./src:/app/src
       - ./public:/app/public
@@ -15,6 +17,8 @@ services:
     build:
       context: .
       dockerfile: Dockerfile.backend.dev
+    ports:
+      - "5311:5311"
     volumes:
       - ./src:/app/src
     environment:

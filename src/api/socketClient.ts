@@ -55,7 +55,7 @@ export class SocketClient {
     this.listeners.forEach((handlers, event) => {
       if (this.socket) {
         handlers.forEach(handler => {
-          this.socket.on(event, handler);
+          this.socket?.on(event, handler);
         });
       }
     });

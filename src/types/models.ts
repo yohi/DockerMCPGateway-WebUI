@@ -112,7 +112,7 @@ export interface LogEntry {
  */
 export interface ValidationResult {
   isValid: boolean;
-  errors: ValidationError[];
+  errors?: ValidationError[];
 }
 
 /**
@@ -129,9 +129,16 @@ export interface ValidationError {
  * Gateway設定
  */
 export interface GatewayConfig {
-  version: string;
-  servers: Record<string, MCPServerConfig>;
-  global: {
+  version?: string;
+  apiEndpoint?: string;
+  autoUpdate?: boolean;
+  defaultTimeout?: number;
+  logLevel?: 'debug' | 'info' | 'warn' | 'error';
+  maxLogSize?: string;
+  healthCheckInterval?: number;
+  mcpServers?: Record<string, MCPServerConfig>;
+  servers?: Record<string, MCPServerConfig>;
+  global?: {
     logLevel: 'debug' | 'info' | 'warn' | 'error';
     maxLogSize: string;
     healthCheckInterval: number;

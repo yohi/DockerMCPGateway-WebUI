@@ -1,0 +1,24 @@
+{
+  "version": "1.0.0",
+  "global": {
+    "logLevel": "info",
+    "maxLogSize": "100MB",
+    "healthCheckInterval": 10000
+  },
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest"]
+    },
+    "terraform": {
+      "command": "docker",
+      "args": ["run", "-i", "--rm", "hashicorp/terraform-mcp-server"]
+    },
+    "github": {
+      "url": "https://api.githubcopilot.com/mcp/",
+      "headers": {
+        "Authorization": "Bearer github_pat_test"
+      }
+    }
+  }
+}

@@ -49,6 +49,7 @@
     "jest-environment-jsdom": "^29.7.0",
     "nodemon": "^3.0.3",
     "postcss": "^8.4.33",
+    "ts-node": "^10.9.0",
     "typescript": "^5.8.3"
   }
 }

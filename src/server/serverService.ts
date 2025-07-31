@@ -42,10 +42,43 @@ export class ServerService {
    */
   public async getServers(req: Request, res: Response): Promise<void> {
     try {
-      // 本来はMCP Gatewayから実際のサーバー一覧を取得する
+      console.log('GET /api/servers endpoint hit in serverService');
+      
+      // 設定ファイルを読み込み
+      const fs = require('fs').promises;
+      const configPath = process.env.CONFIG_PATH || '/app/config/config.json';
+      
+      let config;
+      try {
+        const configData = await fs.readFile(configPath, 'utf-8');
+        config = JSON.parse(configData);
+        console.log('Config loaded successfully, mcpServers count:', Object.keys(config.mcpServers || {}).length);
+      } catch (error) {
+        console.log('Config file not found, using default empty config');
+        config = { mcpServers: {} };
+      }
+      
+      const mcpServers = config.mcpServers || {};
+      const servers: MCPServer[] = [];
+      
+      // MCPサーバー設定をサーバー一覧形式に変換
+      Object.entries(mcpServers).forEach(([serverId, serverConfig]: [string, any]) => {
+        servers.push({
+          id: serverId,
+          name: serverId,
+          description: `MCP Server: ${serverId}`,
+          version: '1.0.0',
+          status: serverConfig.enabled !== false ? 'running' : 'stopped',
+          enabled: serverConfig.enabled !== false,
+          config: serverConfig,
+          lastUpdated: new Date()
+        });
+      });
+      
+      console.log(`Returning ${servers.length} servers:`, servers.map(s => s.id));
       res.json({
         success: true,
-        servers: this.installedServers
+        servers: servers
       });
     } catch (error) {
       console.error('Error fetching servers:', error);

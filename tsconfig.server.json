@@ -7,15 +7,21 @@
         "strict": true,
         "esModuleInterop": true,
         "skipLibCheck": true,
-        "forceConsistentCasingInFileNames": true
+        "forceConsistentCasingInFileNames": true,
+        "moduleResolution": "node",
+        "resolveJsonModule": true,
+        "types": ["node"]
     },
     "include": [
-        "src/server/**/*"
+        "src/server/**/*",
+        "src/utils/**/*",
+        "src/types/**/*"
     ],
     "exclude": [
         "node_modules",
         "src/app",
         "src/components",
-        "src/pages"
+        "src/pages",
+        "src/api/socketClient.ts"
     ]
 }
