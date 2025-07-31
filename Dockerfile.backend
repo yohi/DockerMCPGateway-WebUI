@@ -1,0 +1,29 @@
+FROM node:20-alpine
+
+# 作業ディレクトリを設定
+WORKDIR /app
+
+# パッケージファイルをコピー
+COPY package*.json ./
+
+# 依存関係のインストール
+RUN npm install
+
+# ソースコードをコピー
+COPY . .
+
+# TypeScriptをバックエンド専用でビルド
+RUN npx tsc --project tsconfig.server.json
+
+# 必要なディレクトリを作成
+RUN mkdir -p /app/config
+
+# ポートを公開
+EXPOSE 5311
+
+# 環境変数の設定
+ENV NODE_ENV=production
+ENV PORT=5311
+
+# サーバーを起動
+CMD ["node", "dist/server/server.js"]

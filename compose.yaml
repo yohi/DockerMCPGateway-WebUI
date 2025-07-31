@@ -1,0 +1,88 @@
+services:
+  mcp-web-gui:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: mcp-web-gui
+    restart: unless-stopped
+    ports:
+      - "5310:5310"
+    environment:
+      - NODE_ENV=production
+      - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
+      - CONFIG_PATH=/app/config
+      - NEXT_PUBLIC_API_BASE_URL=http://mcp-backend:5311/api
+      - API_BASE_URL=http://mcp-backend:5311/api
+    volumes:
+      # 設定ファイルとバックアップの永続化
+      - ./config:/app/config
+    depends_on:
+      - mcp-gateway
+      - mcp-backend
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5310"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # バックエンドAPIサービス
+  mcp-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend
+    container_name: mcp-backend
+    restart: unless-stopped
+    ports:
+      - "5311:5311"
+    environment:
+      - NODE_ENV=production
+      - PORT=5311
+      - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
+      - CONFIG_PATH=/app/config
+    volumes:
+      - ./config:/app/config
+      - ./src:/app/src
+    depends_on:
+      - mcp-gateway
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:5311/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+  # MCP Gateway サービス
+  mcp-gateway:
+    image: docker/mcp-gateway:latest
+    container_name: mcp-gateway
+    restart: unless-stopped
+    command: ["--port", "8080", "--transport", "streaming"]
+    ports:
+      - "18080:8080"
+    volumes:
+      # 設定ファイルとログの永続化
+      - ./gateway-config:/app/config
+      - ./gateway-logs:/app/logs
+      # Docker socketのマウント
+      - /run/user/1000/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+      - DOCKER_SOCKET=/var/run/docker.sock
+    networks:
+      - mcp-network
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8080/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 20s
+
+networks:
+  mcp-network:
+    driver: bridge
+    name: mcp-network

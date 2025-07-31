@@ -1,0 +1,24 @@
+services:
+  mcp-web-gui:
+    build:
+      context: .
+      dockerfile: Dockerfile.dev
+    volumes:
+      - ./src:/app/src
+      - ./public:/app/public
+    environment:
+      - NODE_ENV=development
+      - NEXT_TELEMETRY_DISABLED=1
+    command: ["npm", "run", "dev"]
+
+  mcp-backend:
+    build:
+      context: .
+      dockerfile: Dockerfile.backend.dev
+    volumes:
+      - ./src:/app/src
+    environment:
+      - NODE_ENV=development
+      - PORT=5311
+      - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
+    command: ["npm", "run", "dev:server"]
