@@ -265,8 +265,8 @@ export default function SettingsPage() {
                             onClick={handleImportClick}
                             disabled={isLoading}
                             className={`font-bold py-2 px-4 rounded ${isLoading
-                                    ? 'bg-gray-400 cursor-not-allowed text-gray-700'
-                                    : 'bg-green-500 hover:bg-green-700 text-white'
+                                ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                                : 'bg-green-500 hover:bg-green-700 text-white'
                                 }`}
                         >
                             {isLoading ? '処理中...' : 'JSONファイルをインポート'}
@@ -275,8 +275,8 @@ export default function SettingsPage() {
                             onClick={handleCreateBackup}
                             disabled={isLoading}
                             className={`font-bold py-2 px-4 rounded ${isLoading
-                                    ? 'bg-gray-400 cursor-not-allowed text-gray-700'
-                                    : 'bg-blue-500 hover:bg-blue-700 text-white'
+                                ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                                : 'bg-blue-500 hover:bg-blue-700 text-white'
                                 }`}
                         >
                             {isLoading ? '処理中...' : '現在の設定をエクスポート'}
@@ -285,8 +285,8 @@ export default function SettingsPage() {
                             onClick={handleRestoreBackup}
                             disabled={isLoading}
                             className={`font-bold py-2 px-4 rounded ${isLoading
-                                    ? 'bg-gray-400 cursor-not-allowed text-gray-700'
-                                    : 'bg-yellow-500 hover:bg-yellow-700 text-white'
+                                ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                                : 'bg-yellow-500 hover:bg-yellow-700 text-white'
                                 }`}
                         >
                             {isLoading ? '処理中...' : 'バックアップから復元'}
@@ -305,8 +305,8 @@ export default function SettingsPage() {
                     {/* ステータスメッセージ */}
                     {importStatus.type && (
                         <div className={`p-3 rounded mb-4 ${importStatus.type === 'success' ? 'bg-green-100 border border-green-400 text-green-700' :
-                                importStatus.type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
-                                    'bg-blue-100 border border-blue-400 text-blue-700'
+                            importStatus.type === 'error' ? 'bg-red-100 border border-red-400 text-red-700' :
+                                'bg-blue-100 border border-blue-400 text-blue-700'
                             }`}>
                             <div className="flex justify-between items-center">
                                 <span>{importStatus.message}</span>
@@ -331,8 +331,8 @@ export default function SettingsPage() {
                                     onClick={handleEditConfig}
                                     disabled={isLoading}
                                     className={`font-bold py-1 px-3 rounded mr-2 ${isLoading
-                                            ? 'bg-gray-400 cursor-not-allowed text-gray-700'
-                                            : 'bg-blue-500 hover:bg-blue-700 text-white'
+                                        ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                                        : 'bg-blue-500 hover:bg-blue-700 text-white'
                                         }`}
                                 >
                                     {isLoading ? '読み込み中...' : '編集'}
@@ -343,8 +343,8 @@ export default function SettingsPage() {
                                         onClick={handleSaveConfig}
                                         disabled={isLoading}
                                         className={`font-bold py-1 px-3 rounded mr-2 ${isLoading
-                                                ? 'bg-gray-400 cursor-not-allowed text-gray-700'
-                                                : 'bg-green-500 hover:bg-green-700 text-white'
+                                            ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                                            : 'bg-green-500 hover:bg-green-700 text-white'
                                             }`}
                                     >
                                         {isLoading ? '保存中...' : '保存'}
@@ -353,8 +353,8 @@ export default function SettingsPage() {
                                         onClick={handleCancelEdit}
                                         disabled={isLoading}
                                         className={`font-bold py-1 px-3 rounded ${isLoading
-                                                ? 'bg-gray-400 cursor-not-allowed text-gray-700'
-                                                : 'bg-gray-500 hover:bg-gray-700 text-white'
+                                            ? 'bg-gray-400 cursor-not-allowed text-gray-700'
+                                            : 'bg-gray-500 hover:bg-gray-700 text-white'
                                             }`}
                                     >
                                         キャンセル

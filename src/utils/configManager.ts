@@ -33,7 +33,7 @@ export class ConfigManager {
         const fs = eval('require')('fs').promises;
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const path = eval('require')('path');
-        
+
         // 設定ディレクトリが存在しない場合は作成
         const configDir = path.dirname(this.configPath);
         try {
@@ -41,7 +41,7 @@ export class ConfigManager {
         } catch {
           await fs.mkdir(configDir, { recursive: true });
         }
-        
+
         // 設定ファイルが存在するかチェック
         try {
           await fs.access(this.configPath);
@@ -61,12 +61,12 @@ export class ConfigManager {
               healthCheckInterval: 30000
             }
           };
-          
+
           await fs.writeFile(this.configPath, JSON.stringify(defaultConfig, null, 2));
           this.config = defaultConfig;
           return defaultConfig;
         }
-        
+
         const configData = await fs.readFile(this.configPath, 'utf-8');
         const config = JSON.parse(configData);
         this.config = config;
@@ -103,7 +103,7 @@ export class ConfigManager {
         const fs = eval('require')('fs').promises;
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const path = eval('require')('path');
-        
+
         // 設定ディレクトリが存在しない場合は作成
         const configDir = path.dirname(this.configPath);
         try {
@@ -111,7 +111,7 @@ export class ConfigManager {
         } catch {
           await fs.mkdir(configDir, { recursive: true });
         }
-        
+
         await fs.writeFile(this.configPath, JSON.stringify(config, null, 2));
         this.config = config;
       } catch (error) {
@@ -192,7 +192,7 @@ export class ConfigManager {
         const fs = eval('require')('fs').promises;
         // eslint-disable-next-line @typescript-eslint/no-var-requires
         const path = eval('require')('path');
-        
+
         const configDir = path.dirname(this.configPath);
         const backupPath = path.join(configDir, `backup-${Date.now()}.json`);
 
@@ -305,11 +305,11 @@ export class ConfigManager {
         const hasUrl = serverConfig.url;
 
         if (!hasCommand && !hasImage && !hasUrl) {
-          errors.push({ 
-            field: 'execution', 
-            path: `servers.${serverId}`, 
-            message: 'Server must have either command, image, or url specified', 
-            code: 'MISSING_EXECUTION_METHOD' 
+          errors.push({
+            field: 'execution',
+            path: `servers.${serverId}`,
+            message: 'Server must have either command, image, or url specified',
+            code: 'MISSING_EXECUTION_METHOD'
           });
         }
 

@@ -3,11 +3,17 @@
   "mcpServers": {
     "sample-server": {
       "command": "npx",
-      "args": ["sample-mcp-server@latest"]
+      "args": [
+        "sample-mcp-server@latest"
+      ]
     },
     "docker-server": {
       "command": "docker",
-      "args": ["run", "-it", "sample/mcp-server"]
+      "args": [
+        "run",
+        "-it",
+        "sample/mcp-server"
+      ]
     },
     "url-server": {
       "url": "https://api.example.com/mcp/",
@@ -17,7 +23,10 @@
     },
     "env-server": {
       "command": "python",
-      "args": ["-m", "sample_server"],
+      "args": [
+        "-m",
+        "sample_server"
+      ],
       "env": {
         "ENV_VAR1": "value1",
         "ENV_VAR2": "value2"

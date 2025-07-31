@@ -42,7 +42,7 @@ app.get('/api/config', (req, res) => {
     },
     mcpServers: {}
   };
-  
+
   res.json(defaultConfig);
 });
 
@@ -89,7 +89,7 @@ app.put('/api/config', (req, res) => {
     // MCPサーバー設定の検証
     if (config.mcpServers && typeof config.mcpServers === 'object') {
       const serverValidationErrors = [];
-      
+
       Object.entries(config.mcpServers).forEach(([serverId, serverConfig]) => {
         if (!serverConfig || typeof serverConfig !== 'object') {
           serverValidationErrors.push(`Server ${serverId}: configuration must be an object`);
@@ -135,9 +135,9 @@ app.put('/api/config', (req, res) => {
 
     console.log('Config validation passed');
     console.log('Config saved successfully');
-    
-    res.json({ 
-      success: true, 
+
+    res.json({
+      success: true,
       message: '設定が正常に保存されました',
       config: config
     });
@@ -156,12 +156,12 @@ app.put('/api/config', (req, res) => {
 app.get('/api/servers', async (req, res) => {
   try {
     console.log('GET /api/servers endpoint hit');
-    
+
     // 設定ファイルを読み込み
     const fs = require('fs').promises;
     const path = require('path');
     const configPath = process.env.CONFIG_PATH || '/app/config/config.json';
-    
+
     let config;
     try {
       const configData = await fs.readFile(configPath, 'utf-8');
@@ -170,10 +170,10 @@ app.get('/api/servers', async (req, res) => {
       console.log('Config file not found, using default empty config');
       config = { mcpServers: {} };
     }
-    
+
     const mcpServers = config.mcpServers || {};
     const servers = [];
-    
+
     // MCPサーバー設定をサーバー一覧形式に変換
     Object.entries(mcpServers).forEach(([serverId, serverConfig]) => {
       servers.push({
@@ -187,11 +187,11 @@ app.get('/api/servers', async (req, res) => {
         lastUpdated: new Date()
       });
     });
-    
+
     console.log(`Returning ${servers.length} servers:`, servers.map(s => s.id));
-    res.json({ 
+    res.json({
       success: true,
-      servers: servers 
+      servers: servers
     });
   } catch (error) {
     console.error('Error getting servers:', error);

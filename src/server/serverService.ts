@@ -43,11 +43,11 @@ export class ServerService {
   public async getServers(req: Request, res: Response): Promise<void> {
     try {
       console.log('GET /api/servers endpoint hit in serverService');
-      
+
       // 設定ファイルを読み込み
       const fs = require('fs').promises;
       const configPath = process.env.CONFIG_PATH || '/app/config/config.json';
-      
+
       let config;
       try {
         const configData = await fs.readFile(configPath, 'utf-8');
@@ -57,10 +57,10 @@ export class ServerService {
         console.log('Config file not found, using default empty config');
         config = { mcpServers: {} };
       }
-      
+
       const mcpServers = config.mcpServers || {};
       const servers: MCPServer[] = [];
-      
+
       // MCPサーバー設定をサーバー一覧形式に変換
       Object.entries(mcpServers).forEach(([serverId, serverConfig]: [string, any]) => {
         servers.push({
@@ -74,7 +74,7 @@ export class ServerService {
           lastUpdated: new Date()
         });
       });
-      
+
       console.log(`Returning ${servers.length} servers:`, servers.map(s => s.id));
       res.json({
         success: true,
