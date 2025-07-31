@@ -61,7 +61,7 @@ services:
     image: docker/mcp-gateway:latest
     container_name: mcp-gateway
     restart: unless-stopped
-    command: ["--port", "8080", "--transport", "streaming"]
+    command: ["--port", "8080", "--transport", "http"]
     ports:
       - "18080:8080"
     volumes:

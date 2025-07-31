@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "docker-mcp-gateway-http": {
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-fetch"
+      ],
+      "env": {
+        "HTTP_PROXY": "http://localhost:18080"
+      }
+    }
+  }
+}

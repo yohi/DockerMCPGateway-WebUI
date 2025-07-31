@@ -37,9 +37,35 @@ cd docker-mcp-web-gui
 
 アプリケーションが起動したら、以下のURLでアクセスできます：
 
-- Web UI: http://localhost:5310
-- バックエンドAPI: http://localhost:5311/api
-- MCP Gateway API: http://localhost:18080
+- **Web UI**: http://localhost:5310 - DockerMCPGateway管理画面
+- **バックエンドAPI**: http://localhost:5311/api - 内部APIエンドポイント
+- **MCP Gateway API**: http://localhost:18080 - **Cursor MCP接続用エンドポイント**
+
+### 4. Cursor MCP統合
+
+DockerMCPGatewayは、CursorエディタのMCP機能と統合可能です：
+
+#### 設定確認
+```bash
+# MCP Gatewayが正常に起動していることを確認
+curl -I http://localhost:18080
+
+# コンテナ状態の確認
+docker compose ps
+```
+
+#### Cursor設定ファイル
+プロジェクトには以下の設定ファイルが含まれています：
+- `cursor-mcp-simple.json` - シンプルな設定（推奨）
+- `cursor-mcp-complete.json` - 完全な設定オプション
+
+#### 接続テスト
+```bash
+# MCP Gateway 接続テスト
+curl -X POST -H "Content-Type: application/json" \
+  -d '{"method":"initialize","params":{"protocolVersion":"2024-11-05"}}' \
+  http://localhost:18080/mcp
+```
 
 ## コンテナ構成
 
@@ -99,6 +125,32 @@ docker compose down
 
 ## トラブルシューティング
 
+### Cursor MCP接続の問題
+
+#### 1. MCP Gateway接続確認
+```bash
+# MCP Gatewayの状態確認
+docker compose logs mcp-gateway
+
+# 接続テスト
+curl -I http://localhost:18080
+```
+
+#### 2. Transport設定の確認
+```bash
+# 現在のtransport設定を確認
+docker compose logs mcp-gateway | grep -i transport
+```
+
+#### 3. 設定ファイルのテスト
+```bash
+# シンプル設定をテスト
+cat cursor-mcp-simple.json
+
+# 完全設定をテスト
+cat cursor-mcp-complete.json
+```
+
 ### コンテナが起動しない場合
 
 ログを確認して問題を特定します：
@@ -116,11 +168,21 @@ ports:
   - "新しいホストポート:コンテナポート"
 ```
 
-例えば、5310ポートが既に使用されている場合：
+**重要なポート**:
+- `5310` - Web UI
+- `5311` - Backend API
+- `18080` - **MCP Gateway (Cursor接続用)**
+
+例えば、18080ポートが既に使用されている場合：
 
 ```yaml
 ports:
-  - "8080:5310"  # 5310の代わりに8080を使用
+  - "28080:8080"  # 18080の代わりに28080を使用
+```
+
+この場合、Cursor設定でも新しいポート番号を使用してください：
+```json
+"--url", "http://localhost:28080/mcp"
 ```
 
 ### Dockerボリュームの問題

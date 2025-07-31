@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "docker-mcp-gateway-direct": {
+      "command": "curl",
+      "args": [
+        "-s",
+        "-X",
+        "POST",
+        "-H",
+        "Content-Type: application/json",
+        "--data-raw",
+        "{}",
+        "http://localhost:18080/v1/messages"
+      ]
+    }
+  }
+}
