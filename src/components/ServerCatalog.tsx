@@ -10,6 +10,8 @@ export default function ServerCatalog() {
     const [servers, setServers] = useState<CatalogServer[]>([]);
     const [categories, setCategories] = useState<string[]>(['all', 'official', 'official-integration', 'community', 'custom']);
     const [showAddForm, setShowAddForm] = useState(false);
+    const [showImportForm, setShowImportForm] = useState(false);
+    const [importConfig, setImportConfig] = useState('');
     const [newServer, setNewServer] = useState({
         id: '',
         name: '',
@@ -19,7 +21,6 @@ export default function ServerCatalog() {
         version: '1.0.0',
         tags: [] as string[],
         documentation: '',
-        // mcp-remote用のフィールドを追加
         command: 'npx',
         args: ['-y', 'mcp-remote'],
         remoteUrl: ''
@@ -47,69 +48,6 @@ export default function ServerCatalog() {
             version: '1.1.0',
             image: 'mcp-advanced-server',
             tags: ['advanced', 'extended']
-        },
-        {
-            id: 'mcp-custom',
-            name: 'Custom MCP Implementation',
-            category: 'community',
-            description: 'コミュニティによるカスタムMCP実装。特殊な機能を搭載。',
-            version: '0.9.2',
-            image: 'mcp-custom-server',
-            tags: ['custom', 'experimental']
-        },
-        {
-            id: 'server-everything',
-            name: 'Everything MCP Server',
-            category: 'official',
-            description: 'MCPプロトコルのすべての機能をテストするためのサーバー。プロンプト、ツール、リソースなど様々な機能を実装。',
-            version: '2025.7.1',
-            image: '@modelcontextprotocol/server-everything',
-            tags: ['testing', 'demo', 'comprehensive']
-        },
-        {
-            id: 'server-memory',
-            name: 'Memory MCP Server',
-            category: 'official',
-            description: 'AIアシスタントにメモリ機能を提供するMCPサーバー。会話の記憶と永続化が可能。',
-            version: '2025.7.1',
-            image: '@modelcontextprotocol/server-memory',
-            tags: ['memory', 'persistence']
-        },
-        {
-            id: 'server-filesystem',
-            name: 'FileSystem MCP Server',
-            category: 'official',
-            description: 'ファイルシステムへのアクセスを提供するMCPサーバー。ファイルの読み書きや操作が可能。',
-            version: '2025.7.1',
-            image: '@modelcontextprotocol/server-filesystem',
-            tags: ['filesystem', 'files']
-        },
-        {
-            id: 'server-github',
-            name: 'GitHub MCP Server',
-            category: 'community',
-            description: 'GitHubリポジトリとの連携機能を提供するMCPサーバー。PRやイシューの管理が可能。',
-            version: '2025.7.1',
-            image: '@modelcontextprotocol/server-github',
-            tags: ['github', 'version-control']
-        },
-        {
-            id: 'server-git',
-            name: 'Git MCP Server',
-            category: 'official',
-            description: 'Gitリポジトリとの連携機能を提供するMCPサーバー。コミットやブランチの管理が可能。',
-            version: '2025.7.1',
-            image: 'mcp-server-git',
-            tags: ['git', 'version-control']
-        },
-        {
-            id: 'server-postgres',
-            name: 'PostgreSQL MCP Server',
-            category: 'community',
-            description: 'PostgreSQLデータベースとの連携機能を提供するMCPサーバー。SQLクエリの実行が可能。',
-            version: '2025.7.1',
-            image: '@modelcontextprotocol/server-postgres',
-            tags: ['database', 'postgresql']
         }
     ];
 
@@ -124,20 +62,17 @@ export default function ServerCatalog() {
                 const response = await apiClient.getCatalog();
                 if (response.success && response.servers) {
                     setServers(response.servers);
-                    // バックエンドからカテゴリも取得
                     if (response.categories) {
                         setCategories(response.categories);
                     }
                 } else {
                     setError('カタログデータの取得に失敗しました');
-                    // エラー時にモックデータを使用
                     setServers(mockServers);
                     setCategories(mockCategories);
                 }
             } catch (err) {
                 console.error('カタログ取得エラー:', err);
                 setError('サーバーとの通信中にエラーが発生しました');
-                // エラー時にモックデータを使用
                 setServers(mockServers);
                 setCategories(mockCategories);
             } finally {
@@ -164,7 +99,6 @@ export default function ServerCatalog() {
             const response = await apiClient.installServer(serverId);
             if (response.success) {
                 alert(`サーバー ${serverId} のインストールが完了しました。`);
-                // 成功時の処理、例えばサーバー一覧の再読み込みなど
             } else {
                 setError(`サーバー ${serverId} のインストールに失敗しました`);
             }
@@ -182,35 +116,15 @@ export default function ServerCatalog() {
             setLoading(true);
             setError(null);
 
-            // 基本バリデーション
             if (!newServer.id || !newServer.name || !newServer.image) {
                 setError('必須項目（ID、名前、イメージ）を入力してください');
                 return;
             }
 
-            // mcp-remoteサーバーの場合の追加バリデーション
-            if (newServer.command === 'npx' && newServer.args?.includes('mcp-remote')) {
-                if (!newServer.remoteUrl) {
-                    setError('mcp-remoteサーバーにはRemote URLが必要です');
-                    return;
-                }
-
-                // URLの形式チェック
-                try {
-                    new URL(newServer.remoteUrl);
-                } catch {
-                    setError('有効なURLを入力してください');
-                    return;
-                }
-            }
-
             const response = await apiClient.addCustomServer(newServer);
 
             if (response.success) {
-                // サーバーリストを更新
                 setServers(prev => [...prev, response.server]);
-
-                // フォームをリセット
                 setNewServer({
                     id: '',
                     name: '',
@@ -226,7 +140,6 @@ export default function ServerCatalog() {
                 });
                 setShowAddForm(false);
                 setError(null);
-
                 alert('カスタムサーバーが追加されました');
             } else {
                 setError(response.error?.message || 'サーバーの追加に失敗しました');
@@ -278,12 +191,14 @@ export default function ServerCatalog() {
                         <h2 className="text-lg font-medium">MCP サーバーカタログ</h2>
                         <p className="text-gray-500 text-sm">利用可能なMCPサーバーを探す</p>
                     </div>
-                    <button
-                        onClick={() => setShowAddForm(!showAddForm)}
-                        className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
-                    >
-                        {showAddForm ? 'キャンセル' : 'カスタムサーバー追加'}
-                    </button>
+                    <div className="flex gap-2">
+                        <button
+                            onClick={() => setShowAddForm(true)}
+                            className="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded text-sm"
+                        >
+                            カスタムサーバー追加
+                        </button>
+                    </div>
                 </div>
 
                 {/* カスタムサーバー追加フォーム */}
@@ -387,58 +302,6 @@ export default function ServerCatalog() {
                                         </span>
                                     ))}
                                 </div>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    ドキュメントURL
-                                </label>
-                                <input
-                                    type="url"
-                                    value={newServer.documentation}
-                                    onChange={(e) => setNewServer(prev => ({ ...prev, documentation: e.target.value }))}
-                                    className="w-full p-2 border border-gray-300 rounded"
-                                    placeholder="https://example.com/docs"
-                                />
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    MCP Remote コマンド
-                                </label>
-                                <div className="flex gap-2">
-                                    <input
-                                        type="text"
-                                        value={newServer.command}
-                                        onChange={(e) => setNewServer(prev => ({ ...prev, command: e.target.value }))}
-                                        className="flex-1 p-2 border border-gray-300 rounded"
-                                        placeholder="npx"
-                                    />
-                                    <input
-                                        type="text"
-                                        value={newServer.args.join(' ')}
-                                        onChange={(e) => setNewServer(prev => ({ ...prev, args: e.target.value.split(' ').filter(arg => arg.trim() !== '') }))}
-                                        className="flex-1 p-2 border border-gray-300 rounded"
-                                        placeholder="コマンド引数 (例: -y mcp-remote)"
-                                    />
-                                </div>
-                                <p className="text-xs text-gray-500 mt-1">
-                                    mcp-remoteサーバーの場合: npx -y mcp-remote
-                                </p>
-                            </div>
-                            <div className="md:col-span-2">
-                                <label className="block text-sm font-medium text-gray-700 mb-1">
-                                    MCP Remote URL *
-                                </label>
-                                <input
-                                    type="url"
-                                    value={newServer.remoteUrl}
-                                    onChange={(e) => setNewServer(prev => ({ ...prev, remoteUrl: e.target.value }))}
-                                    className="w-full p-2 border border-gray-300 rounded"
-                                    placeholder="https://mcp.atlassian.com/v1/sse"
-                                    required
-                                />
-                                <p className="text-xs text-gray-500 mt-1">
-                                    例: https://mcp.atlassian.com/v1/sse
-                                </p>
                             </div>
                         </div>
                         <div className="mt-4 flex gap-2">
