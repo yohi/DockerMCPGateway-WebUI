@@ -34,9 +34,7 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
-# 設定ファイルとバックアップ
-/config/*
-!/config/.gitkeep
+# 設定ファイルとバックアップ（旧設定 - 新設定は下記dev/data/に移行）
 
 # IDE
 /.vscode
@@ -47,3 +45,57 @@ next-env.d.ts
 !/gateway-config/.gitkeep
 /gateway-logs/*
 !/gateway-logs/.gitkeep
+
+# 開発データ（動的生成ファイル）
+/dev/data/cache/
+/dev/data/gateway-logs/*
+!/dev/data/gateway-logs/.gitkeep
+/dev/data/config/*
+!/dev/data/config/.gitkeep
+
+# Docker volumes & runtime data
+*.log
+*.tmp
+.cache/
+.swc/
+
+# OS固有
+Thumbs.db
+
+# エディタ一時ファイル
+*.swp
+*.swo
+*~
+.#*
+
+# テスト関連
+/test-results/
+/playwright-report/
+/test-output/
+
+# 開発用一時ファイル
+*.bak
+*.orig
+temp-*
+test-*
+sample-*
+
+# セキュリティ関連
+*.pem
+*.key
+*.crt
+mcp-secrets.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# パッケージマネージャー
+.pnpm-debug.log*
+.yarn-integrity
+yarn.lock
+pnpm-lock.yaml
+
+# Docker関連
+.dockerignore.bak
+docker-compose.override.yml

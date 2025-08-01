@@ -15,7 +15,7 @@ services:
       - API_BASE_URL=http://mcp-backend:5311/api
     volumes:
       # 設定ファイルとバックアップの永続化
-      - ./config:/app/config
+      - ./dev/data/config:/app/config
     depends_on:
       - mcp-gateway
       - mcp-backend
@@ -43,8 +43,7 @@ services:
       - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
       - CONFIG_PATH=/app/config/config.json
     volumes:
-      - ./config:/app/config
-      - ./src:/app/src
+      - ./dev/data/config:/app/config
     depends_on:
       - mcp-gateway
     networks:
@@ -61,13 +60,13 @@ services:
     image: docker/mcp-gateway:latest
     container_name: mcp-gateway
     restart: unless-stopped
-    command: ["--port", "8080", "--transport", "http"]
+    command: ["--port", "8080", "--transport", "http", "--servers", "docker"]
     ports:
       - "18080:8080"
     volumes:
       # 設定ファイルとログの永続化
-      - ./gateway-config:/app/config
-      - ./gateway-logs:/app/logs
+      - ./dev/data/gateway-config:/app/config
+      - ./dev/data/gateway-logs:/app/logs
       # Docker socketのマウント
       - /run/user/1000/docker.sock:/var/run/docker.sock
     environment:

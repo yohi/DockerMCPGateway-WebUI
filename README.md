@@ -54,7 +54,40 @@ ports:
 
 プロジェクトには複数のCursor MCP設定ファイルが含まれています：
 
-#### 推奨設定 (`cursor-mcp-simple.json`)
+#### 🎯 自動サービス管理設定 (`cursor-mcp-auto.json`) - **推奨**
+```json
+{
+  "description": "Docker MCP Gateway - 自動サービス管理版（個別設定不要）",
+  "mcpServers": {
+    "docker-mcp-gateway-auto": {
+      "description": "MCP Gateway with automatic service discovery - no manual configuration needed",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-i",
+        "mcp-gateway",
+        "/docker-mcp",
+        "gateway",
+        "run",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "DOCKER_HOST": "unix:///run/user/1000/docker.sock",
+        "MCP_GATEWAY_CONTAINER": "mcp-gateway"
+      }
+    }
+  }
+}
+```
+
+**特徴**:
+- ✅ **サービス個別設定不要** - MCPサービスを手動で設定ファイルに記載する必要がありません
+- ✅ **自動サービス検出** - 利用可能な全てのMCPサービスが自動的に検出されます
+- ✅ **動的管理** - 新しいサービスが追加されても設定変更不要
+- ✅ **メンテナンスフリー** - カタログとレジストリによる自動管理
+
+#### シンプル設定 (`cursor-mcp-simple.json`)
 ```json
 {
   "mcpServers": {
@@ -88,7 +121,8 @@ HTTP transport と STDIO transport の両方のオプションを含む包括的
    - Gateway API: http://localhost:18080
 
 3. **Cursorに設定**:
-   - `cursor-mcp-simple.json` または `cursor-mcp-complete.json` の内容をCursorのMCP設定に追加
+   - **推奨**: `cursor-mcp-auto.json` の内容をCursorのMCP設定に追加（自動サービス管理）
+   - 代替案: `cursor-mcp-simple.json` または `cursor-mcp-complete.json` を使用
 
 ### トランスポート設定
 
@@ -100,6 +134,42 @@ HTTP transport と STDIO transport の両方のオプションを含む包括的
 
 **注意**: Cursor統合では `http` transport が最も安定しています。
 
+### 自動サービス管理機能
+
+`cursor-mcp-auto.json` を使用することで、以下の自動管理機能が利用できます：
+
+#### 🔄 自動サービス検出
+- **Docker公式カタログ**: https://desktop.docker.com/mcp/catalog/v2/catalog.yaml
+- **ローカルレジストリ**: `./gateway-config/registry.yaml`
+- **インストール済みサービス**: コンテナ内で利用可能な全サービス
+
+#### 📋 利用可能なサービス例
+自動検出により以下のサービスが利用可能になります：
+- `fetch` - HTTP/API リクエスト機能
+- `filesystem` - ファイルシステム操作
+- `github` - GitHub API連携
+- `brave` - Brave検索エンジン
+- `wikipedia-mcp` - Wikipedia検索
+- `duckduckgo` - DuckDuckGo検索
+- `docker` - Docker操作
+- その他カタログ内の全サービス
+
+#### ⚙️ 高度な設定オプション
+追加の自動管理機能が必要な場合は、以下のオプションを追加できます：
+
+```json
+{
+  "command": "docker",
+  "args": [
+    "exec", "-i", "mcp-gateway", "/docker-mcp", "gateway", "run",
+    "--transport", "stdio",
+    "--watch",              // 設定変更の自動監視
+    "--long-lived",         // 長時間実行コンテナ
+    "--registry", "/app/config/registry.yaml"  // カスタムレジストリ
+  ]
+}
+```
+
 ## セットアップ方法
 
 ### Dockerによる実行（推奨）
@@ -109,23 +179,24 @@ HTTP transport と STDIO transport の両方のオプションを含む包括的
 git clone https://github.com/yourorg/docker-mcp-web-gui.git
 cd docker-mcp-web-gui
 
-# 起動スクリプトを使用して起動する
-# 本番環境
-./start.sh
+# Option 1: Makefileを使用（推奨）
+make help           # 利用可能なコマンドを表示
+make build          # 本番用コンテナをビルド
+make up             # 本番環境を起動
+make dev-build      # 開発用コンテナをビルド
+make dev-up         # 開発環境を起動
 
-# 開発環境
-./start.sh dev
+# Option 2: 専用スクリプトを使用
+./dev/tools/scripts/docker.sh help    # ヘルプ表示
+./dev/tools/scripts/docker.sh build   # 本番用ビルド
+./dev/tools/scripts/docker.sh up      # 本番環境起動
+./dev/tools/scripts/docker.sh dev-up  # 開発環境起動
 
-# 手動で起動する場合
-# イメージのビルドと起動
-docker compose build
-docker compose up -d
-
-# ログの表示
-docker compose logs -f
-
-# コンテナの停止
-docker compose down
+# Option 3: 直接Docker Composeを使用
+docker compose build        # 本番用ビルド
+docker compose up -d        # 本番環境起動
+docker compose logs -f      # ログ表示
+docker compose down         # 停止
 ```
 
 ### 開発環境での各コンテナの管理
@@ -203,7 +274,8 @@ docker-mcp-web-gui/
 ├── config/              # 設定ファイル (マウントポイント)
 ├── gateway-config/      # MCP Gateway設定ファイル
 ├── gateway-logs/        # MCP Gatewayログファイル
-├── cursor-mcp-*.json    # Cursor MCP設定ファイル
+├── cursor-mcp-auto.json      # 自動サービス管理設定（推奨）
+├── cursor-mcp-*.json         # その他Cursor MCP設定ファイル
 └── compose.yaml         # Docker Compose 設定
 ```
 
@@ -248,8 +320,18 @@ docker-mcp-web-gui/
    ```
 
 4. **設定ファイルの確認**:
-   - `cursor-mcp-simple.json` から開始
+   - **推奨**: `cursor-mcp-auto.json` から開始（自動サービス管理）
+   - 軽量版: `cursor-mcp-simple.json` を試す
    - 問題があれば `cursor-mcp-complete.json` を試す
+
+5. **自動サービス検出の確認**:
+   ```bash
+   # 利用可能なサービス一覧を確認
+   docker exec mcp-gateway /docker-mcp gateway run --dry-run
+
+   # カタログの確認
+   curl -s https://desktop.docker.com/mcp/catalog/v2/catalog.yaml | head -20
+   ```
 
 ### 一般的な問題
 

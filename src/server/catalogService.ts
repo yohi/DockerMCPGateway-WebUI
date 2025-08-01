@@ -2,6 +2,7 @@ import { Request, Response } from 'express';
 import fetch from 'node-fetch';
 import serverService from './serverService';
 import { MCPServer, CatalogServer } from '../types/models';
+import mcpParserService from './mcpParserService';
 
 /**
  * MCPカタログサービス
@@ -21,20 +22,33 @@ export class CatalogService {
    */
   public async getCatalog(req: Request, res: Response): Promise<void> {
     try {
-      const officialServers = await this.getOfficialServers();
-      const officialIntegrations = await this.getOfficialIntegrations();
-      const communityServers = await this.getCommunityServers();
+      // 動的パーサーから最新のサーバー情報を取得
+      const {
+        officialServers,
+        officialIntegrations,
+        communityServers,
+        categories,
+        subcategories
+      } = await mcpParserService.getAllServers();
 
       // 全サーバーを結合（カスタムサーバーも含める）
       const allServers = [...officialServers, ...officialIntegrations, ...communityServers, ...this.customServers];
 
-      // カテゴリ一覧（拡張）
-      const categories = ['all', 'official', 'official-integration', 'community', 'custom'];
+      // 統計情報を追加
+      const stats = {
+        total: allServers.length,
+        official: officialServers.length,
+        officialIntegrations: officialIntegrations.length,
+        community: communityServers.length,
+        custom: this.customServers.length
+      };
 
       res.json({
         success: true,
         servers: allServers,
-        categories
+        categories,
+        subcategories,
+        stats
       });
     } catch (error) {
       console.error('Error fetching catalog:', error);
@@ -618,6 +632,342 @@ export class CatalogService {
             }
           }
         }
+      },
+      {
+        id: 'server-alibaba-adb-mysql',
+        name: 'Alibaba Cloud AnalyticDB for MySQL',
+        category: 'official-integration',
+        description: 'Connect to AnalyticDB for MySQL cluster for getting database or table metadata, querying and analyzing data',
+        version: 'latest',
+        image: 'aliyun/alibabacloud-adb-mysql-mcp-server',
+        author: 'Alibaba Cloud',
+        downloads: 600,
+        tags: ['database', 'mysql', 'analyticdb', 'cloud'],
+        documentation: 'https://github.com/aliyun/alibabacloud-adb-mysql-mcp-server',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'aliyun/alibabacloud-adb-mysql-mcp-server'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-alibaba-adb-postgresql',
+        name: 'Alibaba Cloud AnalyticDB for PostgreSQL',
+        category: 'official-integration',
+        description: 'Connect to AnalyticDB for PostgreSQL instances, query and analyze data',
+        version: 'latest',
+        image: 'aliyun/alibabacloud-adbpg-mcp-server',
+        author: 'Alibaba Cloud',
+        downloads: 500,
+        tags: ['database', 'postgresql', 'analyticdb', 'cloud'],
+        documentation: 'https://github.com/aliyun/alibabacloud-adbpg-mcp-server',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'aliyun/alibabacloud-adbpg-mcp-server'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-alibaba-dataworks',
+        name: 'Alibaba Cloud DataWorks',
+        category: 'official-integration',
+        description: 'Manage data development, orchestration, and analytics workflows with DataWorks',
+        version: 'latest',
+        image: 'aliyun/alibabacloud-dataworks-mcp-server',
+        author: 'Alibaba Cloud',
+        downloads: 400,
+        tags: ['dataworks', 'workflow', 'analytics', 'cloud'],
+        documentation: 'https://github.com/aliyun/alibabacloud-dataworks-mcp-server',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'aliyun/alibabacloud-dataworks-mcp-server'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-anthropic-claude',
+        name: 'Claude by Anthropic',
+        category: 'official-integration',
+        description: 'Access Claude AI models and capabilities through MCP',
+        version: 'latest',
+        image: 'anthropics/anthropic-claude-mcp',
+        author: 'Anthropic',
+        downloads: 8500,
+        tags: ['ai', 'claude', 'anthropic', 'llm'],
+        documentation: 'https://github.com/anthropics/anthropic-claude-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'anthropics/anthropic-claude-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-aws-bedrock',
+        name: 'AWS Bedrock',
+        category: 'official-integration',
+        description: 'Connect to AWS Bedrock for foundation models and generative AI capabilities',
+        version: 'latest',
+        image: 'aws/aws-bedrock-mcp',
+        author: 'Amazon Web Services',
+        downloads: 3200,
+        tags: ['aws', 'bedrock', 'ai', 'foundation-models'],
+        documentation: 'https://github.com/aws/aws-bedrock-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'aws/aws-bedrock-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-browserbase',
+        name: 'Browserbase',
+        category: 'official-integration',
+        description: 'Browser automation and web scraping capabilities through Browserbase',
+        version: 'latest',
+        image: 'browserbase/mcp',
+        author: 'Browserbase',
+        downloads: 1900,
+        tags: ['browser', 'automation', 'scraping', 'web'],
+        documentation: 'https://github.com/browserbase/mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'browserbase/mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-claude-chat',
+        name: 'Claude Chat',
+        category: 'official-integration',
+        description: 'Direct integration with Claude chat interface and capabilities',
+        version: 'latest',
+        image: 'anthropics/claude-chat-mcp',
+        author: 'Anthropic',
+        downloads: 6700,
+        tags: ['claude', 'chat', 'conversation', 'ai'],
+        documentation: 'https://github.com/anthropics/claude-chat-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'anthropics/claude-chat-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-discord',
+        name: 'Discord',
+        category: 'official-integration',
+        description: 'Discord bot integration and server management capabilities',
+        version: 'latest',
+        image: 'discord/discord-mcp',
+        author: 'Discord',
+        downloads: 4300,
+        tags: ['discord', 'bot', 'messaging', 'community'],
+        documentation: 'https://github.com/discord/discord-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'discord/discord-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-duckduckgo',
+        name: 'DuckDuckGo',
+        category: 'official-integration',
+        description: 'Privacy-focused web search capabilities through DuckDuckGo',
+        version: 'latest',
+        image: 'duckduckgo/duckduckgo-mcp',
+        author: 'DuckDuckGo',
+        downloads: 2800,
+        tags: ['search', 'privacy', 'web', 'duckduckgo'],
+        documentation: 'https://github.com/duckduckgo/duckduckgo-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'duckduckgo/duckduckgo-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-firecrawl',
+        name: 'Firecrawl',
+        category: 'official-integration',
+        description: 'Advanced web scraping and content extraction with Firecrawl',
+        version: 'latest',
+        image: 'firecrawl/mcp',
+        author: 'Firecrawl',
+        downloads: 1600,
+        tags: ['scraping', 'extraction', 'web', 'content'],
+        documentation: 'https://github.com/firecrawl/mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'firecrawl/mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-linear',
+        name: 'Linear',
+        category: 'official-integration',
+        description: 'Issue tracking and project management with Linear integration',
+        version: 'latest',
+        image: 'linear/linear-mcp',
+        author: 'Linear',
+        downloads: 3100,
+        tags: ['project-management', 'issues', 'linear', 'productivity'],
+        documentation: 'https://github.com/linear/linear-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'linear/linear-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-notion',
+        name: 'Notion',
+        category: 'official-integration',
+        description: 'Notion workspace integration for notes, databases, and collaboration',
+        version: 'latest',
+        image: 'notion/notion-mcp',
+        author: 'Notion',
+        downloads: 5200,
+        tags: ['notion', 'notes', 'database', 'collaboration'],
+        documentation: 'https://github.com/notion/notion-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'notion/notion-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-openai',
+        name: 'OpenAI',
+        category: 'official-integration',
+        description: 'Direct access to OpenAI models and APIs through MCP',
+        version: 'latest',
+        image: 'openai/openai-mcp',
+        author: 'OpenAI',
+        downloads: 9800,
+        tags: ['openai', 'gpt', 'ai', 'llm'],
+        documentation: 'https://github.com/openai/openai-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'openai/openai-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-stripe',
+        name: 'Stripe',
+        category: 'official-integration',
+        description: 'Payment processing and financial operations with Stripe',
+        version: 'latest',
+        image: 'stripe/stripe-mcp',
+        author: 'Stripe',
+        downloads: 4700,
+        tags: ['payments', 'stripe', 'finance', 'billing'],
+        documentation: 'https://github.com/stripe/stripe-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'stripe/stripe-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-supabase',
+        name: 'Supabase',
+        category: 'official-integration',
+        description: 'Backend-as-a-Service integration with Supabase for database and auth',
+        version: 'latest',
+        image: 'supabase/supabase-mcp',
+        author: 'Supabase',
+        downloads: 3600,
+        tags: ['database', 'auth', 'backend', 'supabase'],
+        documentation: 'https://github.com/supabase/supabase-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'supabase/supabase-mcp'
+            }
+          }
+        }
+      },
+      {
+        id: 'server-vercel',
+        name: 'Vercel',
+        category: 'official-integration',
+        description: 'Deployment and hosting management with Vercel platform',
+        version: 'latest',
+        image: 'vercel/vercel-mcp',
+        author: 'Vercel',
+        downloads: 2900,
+        tags: ['deployment', 'hosting', 'vercel', 'frontend'],
+        documentation: 'https://github.com/vercel/vercel-mcp',
+        configSchema: {
+          type: 'object',
+          properties: {
+            image: {
+              type: 'string',
+              default: 'vercel/vercel-mcp'
+            }
+          }
+        }
       }
     ];
   }
@@ -702,6 +1052,31 @@ export class CatalogService {
         }
       }
     ];
+  }
+
+  /**
+   * カタログキャッシュをクリア
+   * @param req リクエスト
+   * @param res レスポンス
+   */
+  public async clearCache(req: Request, res: Response): Promise<void> {
+    try {
+      mcpParserService.clearCache();
+
+      res.json({
+        success: true,
+        message: 'カタログキャッシュをクリアしました'
+      });
+    } catch (error) {
+      console.error('Error clearing cache:', error);
+      res.status(500).json({
+        success: false,
+        error: {
+          code: 'CACHE_CLEAR_ERROR',
+          message: 'キャッシュのクリア中にエラーが発生しました'
+        }
+      });
+    }
   }
 
   /**

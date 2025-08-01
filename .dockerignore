@@ -68,3 +68,37 @@ $RECYCLE.BIN/
 .directory
 .Trash-*
 .nfs*
+
+# Git
+.git/
+.gitignore
+.gitattributes
+
+# Documentation
+README.md
+*.md
+docs/
+
+# Development
+docker-mcp-web-gui-bk/
+*.bak
+*.tmp
+*.temp
+
+# Test files
+**/*.test.*
+**/*.spec.*
+__tests__/
+test/
+tests/
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Backups and temp files
+cursor-mcp-*.json
+test-*.json
+sample-*.json
+*-logs/
+gateway-logs/

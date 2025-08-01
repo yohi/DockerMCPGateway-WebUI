@@ -1,22 +1,50 @@
-FROM node:20-alpine
+FROM node:20-alpine AS base
 
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# パッケージファイルをコピー
-COPY package*.json ./
+# パッケージマネージャーの最適化
+RUN npm config set fund false && \
+    npm config set audit false
 
-# 依存関係のインストール
-RUN npm install
+# 依存関係のインストール（マルチステージ）
+FROM base AS deps
+COPY dev/tools/configs/package.json dev/tools/configs/package-lock.json* ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm install --only=production
 
-# ソースコードをコピー
-COPY . .
+# ビルドステージ
+FROM base AS builder
+COPY dev/tools/configs/package.json dev/tools/configs/package-lock.json* ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm install
+
+# ソースファイルのみをコピー（必要なもののみ）
+COPY src/ ./src/
+COPY dev/tools/configs/tsconfig.server.json ./tsconfig.server.json
 
 # TypeScriptをバックエンド専用でビルド
 RUN npx tsc --project tsconfig.server.json
 
+# 本番ステージ
+FROM base AS runner
+
+# 非rootユーザーを作成
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 backend
+
+WORKDIR /app
+
+# 必要なファイルのみをコピー
+COPY --from=deps --chown=backend:nodejs /app/node_modules ./node_modules
+COPY --from=builder --chown=backend:nodejs /app/dist ./dist
+COPY --from=builder --chown=backend:nodejs /app/package.json ./package.json
+
 # 必要なディレクトリを作成
-RUN mkdir -p /app/config
+RUN mkdir -p /app/config && \
+    chown -R backend:nodejs /app/config
+
+USER backend
 
 # ポートを公開
 EXPOSE 5311

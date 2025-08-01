@@ -1,27 +1,39 @@
-FROM node:20-alpine
+FROM node:20-alpine AS base
 
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# パッケージファイルをコピー
-COPY package*.json ./
+# パッケージマネージャーの最適化
+RUN npm config set fund false && \
+    npm config set audit false
 
-# 依存関係のインストール（開発用）
-RUN npm install
+# 開発用依存関係をインストール
+COPY dev/tools/configs/package.json dev/tools/configs/package-lock.json* ./
+RUN --mount=type=cache,target=/root/.npm \
+    npm install
 
-# ソースコードをコピー
-COPY . .
+# 設定ファイルをコピー（開発時は直接参照）
+COPY dev/tools/configs/next.config.js ./next.config.js
+COPY dev/tools/configs/tailwind.config.js ./tailwind.config.js
+COPY dev/tools/configs/postcss.config.js ./postcss.config.js
+COPY dev/tools/configs/tsconfig.json ./tsconfig.json
 
-# 必要なディレクトリを作成
-RUN mkdir -p /app/config
+# 開発サーバー用のポートを公開
+EXPOSE 3000
 
-# ポートを公開
-EXPOSE 5310
+# 開発者権限でユーザーを作成
+RUN addgroup --system --gid 1001 nodejs && \
+    adduser --system --uid 1001 developer
+
+# 必要なディレクトリを作成し、権限を設定
+RUN mkdir -p /app/.next /app/src /app/public && \
+    chown -R developer:nodejs /app
+
+USER developer
 
 # 環境変数の設定
 ENV NODE_ENV=development
-ENV PORT=5310
 ENV NEXT_TELEMETRY_DISABLED=1
 
-# Next.js開発サーバー起動
+# 開発サーバーを起動（ファイル変更を監視）
 CMD ["npm", "run", "dev"]

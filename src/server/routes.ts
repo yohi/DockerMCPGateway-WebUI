@@ -15,6 +15,10 @@ router.post('/catalog/install', async (req: Request, res: Response) => {
   await catalogService.installServer(req, res);
 });
 
+router.post('/catalog/clear-cache', async (req: Request, res: Response) => {
+  await catalogService.clearCache(req, res);
+});
+
 // カスタムサーバー管理API
 router.post('/catalog/custom', async (req: Request, res: Response) => {
   await catalogService.addCustomServer(req, res);

@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { ApiClient } from '../api/apiClient';
 import { CatalogServer } from '../types/models';
+import { CatalogStats } from '../types/api';
 
 export default function ServerCatalog() {
     const [selectedCategory, setSelectedCategory] = useState('all');
@@ -9,6 +10,8 @@ export default function ServerCatalog() {
     const [error, setError] = useState<string | null>(null);
     const [servers, setServers] = useState<CatalogServer[]>([]);
     const [categories, setCategories] = useState<string[]>(['all', 'official', 'official-integration', 'community', 'custom']);
+    const [subcategories, setSubcategories] = useState<{ [key: string]: string[] }>({});
+    const [stats, setStats] = useState<CatalogStats | null>(null);
     const [showAddForm, setShowAddForm] = useState(false);
     const [showImportForm, setShowImportForm] = useState(false);
     const [importConfig, setImportConfig] = useState('');
@@ -64,6 +67,12 @@ export default function ServerCatalog() {
                     setServers(response.servers);
                     if (response.categories) {
                         setCategories(response.categories);
+                    }
+                    if (response.subcategories) {
+                        setSubcategories(response.subcategories);
+                    }
+                    if (response.stats) {
+                        setStats(response.stats);
                     }
                 } else {
                     setError('カタログデータの取得に失敗しました');

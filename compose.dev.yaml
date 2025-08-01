@@ -1,28 +1,71 @@
+# 開発用Docker Compose設定
+version: '3.8'
+
 services:
-  mcp-web-gui:
+  mcp-web-gui-dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
+    container_name: mcp-web-gui-dev
     ports:
-      - "3000:5310"
-    volumes:
-      - ./src:/app/src
-      - ./public:/app/public
+      - "3000:3000"    # Next.js開発サーバー
+      - "5310:5310"    # 本番ポート
     environment:
       - NODE_ENV=development
-      - NEXT_TELEMETRY_DISABLED=1
+      - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
+      - NEXT_PUBLIC_API_BASE_URL=http://mcp-backend-dev:5311/api
+    volumes:
+      # ソースコードのライブリロード
+      - ./src:/app/src
+      - ./public:/app/public
+      - ./dev/tools/configs:/app/configs
+      # Node.js関連キャッシュの永続化
+      - dev_node_modules:/app/node_modules
+      - dev_next_cache:/app/.next
     command: ["npm", "run", "dev"]
+    depends_on:
+      - mcp-backend-dev
+      - mcp-gateway
+    networks:
+      - mcp-network
 
-  mcp-backend:
+  mcp-backend-dev:
     build:
       context: .
       dockerfile: Dockerfile.backend.dev
+    container_name: mcp-backend-dev
     ports:
       - "5311:5311"
-    volumes:
-      - ./src:/app/src
     environment:
       - NODE_ENV=development
-      - PORT=5311
-      - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
+    volumes:
+      - ./src:/app/src
+      - backend_node_modules:/app/node_modules
     command: ["npm", "run", "dev:server"]
+    networks:
+      - mcp-network
+
+  mcp-gateway:
+    image: docker/mcp-gateway:latest
+    restart: unless-stopped
+    command: ["--port", "8080", "--transport", "http", "--servers", "docker"]
+    ports:
+      - "18080:8080"
+    volumes:
+      - ./dev/data/gateway-config:/app/config
+      - ./dev/data/gateway-logs:/app/logs
+      - /run/user/1000/docker.sock:/var/run/docker.sock
+    environment:
+      - DOCKER_HOST=unix:///var/run/docker.sock
+    networks:
+      - mcp-network
+
+volumes:
+  dev_node_modules:
+  dev_next_cache:
+  backend_node_modules:
+
+networks:
+  mcp-network:
+    driver: bridge
+    name: mcp-network-dev

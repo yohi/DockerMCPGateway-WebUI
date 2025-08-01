@@ -24,15 +24,12 @@ export class ApiClient {
     // 環境に応じてAPIのURLを設定
     if (baseUrl) {
       this.baseUrl = baseUrl;
-    } else if (typeof window !== 'undefined' && window.location.hostname === 'localhost') {
-      // ローカル開発環境 (ブラウザからlocalhostでアクセスする場合)
-      this.baseUrl = 'http://localhost:5311/api';
     } else if (typeof window !== 'undefined') {
-      // ブラウザ環境 (Dockerコンテナからアクセスする場合、またはホスト名がlocalhostでない場合)
-      this.baseUrl = 'http://mcp-backend:5311/api';
+      // ブラウザ環境 - Next.jsのAPIルートを使用（相対パス）
+      this.baseUrl = '/api';
     } else {
       // サーバー環境 (Next.jsのAPIルートなど)
-      this.baseUrl = (typeof globalThis !== 'undefined' && globalThis.process?.env?.NEXT_PUBLIC_API_BASE_URL) || 'http://localhost:5311/api';
+      this.baseUrl = (typeof globalThis !== 'undefined' && globalThis.process?.env?.NEXT_PUBLIC_API_BASE_URL) || '/api';
     }
     console.log('API Client initialized with baseUrl:', this.baseUrl);
   }
@@ -107,8 +104,8 @@ export class ApiClient {
   /**
    * カタログを取得
    */
-  async getCatalog(): Promise<{ success: boolean; servers?: any[]; categories?: string[]; error?: any }> {
-    return this.fetchApi('/catalog');
+  async getCatalog(): Promise<GetCatalogResponse> {
+    return this.fetchApi('/servers/catalog');
   }
 
   /**

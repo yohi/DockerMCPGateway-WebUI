@@ -41,12 +41,26 @@ export interface TestServerResponse {
 }
 
 /**
+ * カタログ統計情報
+ */
+export interface CatalogStats {
+  total: number;
+  official: number;
+  officialIntegrations: number;
+  community: number;
+  custom: number;
+}
+
+/**
  * カタログ取得API レスポンス
  */
 export interface GetCatalogResponse {
   success: boolean;
   servers: CatalogServer[];
   categories: string[];
+  subcategories?: { [key: string]: string[] };
+  stats?: CatalogStats;
+  error?: any;
 }
 
 /**

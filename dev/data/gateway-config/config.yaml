@@ -1,0 +1,4 @@
+# Docker MCP Gateway 設定
+# 利用可能なサーバーを明示的に指定
+servers:
+  - docker
