@@ -3,6 +3,45 @@
  */
 
 /**
+ * MCPツール
+ */
+export interface MCPTool {
+  name: string;
+  description?: string;
+  inputSchema?: Record<string, any>;
+  tags?: string[];
+}
+
+/**
+ * MCPリソース
+ */
+export interface MCPResource {
+  uri: string;
+  name?: string;
+  description?: string;
+  mimeType?: string;
+}
+
+/**
+ * MCPプロンプト
+ */
+export interface MCPPrompt {
+  name: string;
+  description?: string;
+  arguments?: Record<string, any>[];
+}
+
+/**
+ * MCPサーバー機能
+ */
+export interface MCPCapabilities {
+  tools?: MCPTool[];
+  resources?: MCPResource[];
+  prompts?: MCPPrompt[];
+  lastUpdated?: Date;
+}
+
+/**
  * MCPサーバー
  */
 export interface MCPServer {
@@ -15,19 +54,25 @@ export interface MCPServer {
   config: MCPServerConfig;
   lastUpdated: Date;
   healthCheck?: HealthCheckResult;
+  capabilities?: MCPCapabilities;
 }
 
 /**
  * MCPサーバー設定
  */
 export interface MCPServerConfig {
-  image: string;
+  image?: string;
   ports?: PortMapping[];
   environment?: Record<string, string>;
   volumes?: VolumeMapping[];
-  command?: string[];
+  command?: string;
   args?: string[];
   resources?: ResourceLimits;
+  // URL-based configuration
+  url?: string;
+  headers?: Record<string, string>;
+  // Environment variables
+  env?: Record<string, string>;
 }
 
 /**

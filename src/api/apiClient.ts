@@ -44,19 +44,60 @@ export class ApiClient {
     const url = path.startsWith('/') ? `${this.baseUrl}${path}` : `${this.baseUrl}/${path}`;
     console.log(`Fetching API: ${url}`);
 
-    const response = await fetch(url, {
-      headers: {
-        'Content-Type': 'application/json',
-        ...options.headers,
-      },
-      ...options,
-    });
+    try {
+      // タイムアウト制御
+      const controller = new AbortController();
+      const timeoutId = setTimeout(() => controller.abort(), 10000); // 10秒のタイムアウト
 
-    if (!response.ok) {
-      throw new Error(`API request failed: ${response.status} ${response.statusText}`);
+      const response = await fetch(url, {
+        headers: {
+          'Content-Type': 'application/json',
+          ...options.headers,
+        },
+        signal: controller.signal,
+        ...options,
+      });
+
+      clearTimeout(timeoutId);
+
+      if (!response.ok) {
+        let errorMessage = `HTTP ${response.status}: ${response.statusText}`;
+
+        // レスポンスボディからエラー詳細を取得
+        try {
+          const errorData = await response.json();
+          if (errorData.error) {
+            errorMessage = typeof errorData.error === 'string'
+              ? errorData.error
+              : errorData.error.message || errorMessage;
+          }
+        } catch (e) {
+          // JSONパースエラーは無視してデフォルトメッセージを使用
+        }
+
+        throw new Error(errorMessage);
+      }
+
+      return response.json();
+    } catch (error) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('タイムアウトエラー: サーバーからの応答が遅すぎます');
+      } else if (error instanceof TypeError && error.message.includes('fetch')) {
+        // さらに詳細なエラー分析
+        const causedBy = (error as any).cause;
+
+        if (causedBy && causedBy.code === 'ECONNREFUSED') {
+          throw new Error('ネットワーク接続エラー: バックエンドサーバー (localhost:3001) への接続が拒否されました');
+        } else if (error.message.includes('ENOTFOUND')) {
+          throw new Error('ネットワーク接続エラー: サーバーのホスト名を解決できません');
+        } else if (error.message.includes('ETIMEDOUT')) {
+          throw new Error('ネットワーク接続エラー: サーバーへの接続がタイムアウトしました');
+        } else {
+          throw new Error('ネットワーク接続エラー: サーバーに接続できません');
+        }
+      }
+      throw error;
     }
-
-    return response.json();
   }
 
   /**
@@ -99,6 +140,14 @@ export class ApiClient {
     return this.fetchApi(`/servers/${serverId}/test`, {
       method: 'POST',
     });
+  }
+
+  /**
+   * サーバーの機能情報を取得
+   * @param serverId サーバーID
+   */
+  async getServerCapabilities(serverId: string): Promise<{ success: boolean; capabilities?: any; error?: any }> {
+    return this.fetchApi(`/servers/${serverId}/capabilities`);
   }
 
   /**
@@ -195,5 +244,19 @@ export class ApiClient {
       method: 'POST',
       body: JSON.stringify({ backupPath }),
     });
+  }
+
+  /**
+   * サーバーのヘルスチェック
+   * @param serverId サーバーID
+   */
+  async checkServerHealth(serverId: string): Promise<any> {
+    try {
+      const result = await this.fetchApi<any>(`/servers/${serverId}/health`);
+      return result;
+    } catch (error) {
+      console.error(`Failed to check health for server ${serverId}:`, error);
+      throw error;
+    }
   }
 }

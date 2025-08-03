@@ -9,15 +9,13 @@ services:
       - "5310:5310"
     environment:
       - NODE_ENV=production
-      - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
+      - MCP_GATEWAY_API_URL=http://mcp-backend:5311/api
       - CONFIG_PATH=/app/config/config.json
       - NEXT_PUBLIC_API_BASE_URL=http://mcp-backend:5311/api
       - API_BASE_URL=http://mcp-backend:5311/api
     volumes:
-      # 設定ファイルとバックアップの永続化
       - ./dev/data/config:/app/config
     depends_on:
-      - mcp-gateway
       - mcp-backend
     networks:
       - mcp-network
@@ -40,14 +38,11 @@ services:
     environment:
       - NODE_ENV=production
       - PORT=5311
-      - MCP_GATEWAY_API_URL=http://mcp-gateway:8080/api
       - CONFIG_PATH=/app/config/config.json
     volumes:
       - ./dev/data/config:/app/config
-      # Docker socket access for MCP servers
-      - /var/run/docker.sock:/var/run/docker.sock
-    depends_on:
-      - mcp-gateway
+      # Docker socket access - fixed permissions
+      - /var/run/docker.sock:/var/run/docker.sock:rw
     networks:
       - mcp-network
     healthcheck:
@@ -56,42 +51,6 @@ services:
       timeout: 10s
       retries: 3
       start_period: 20s
-
-  # MCP Gateway サービス (Docker-in-Docker対応)
-  mcp-gateway:
-    image: docker/mcp-gateway:latest
-    container_name: mcp-gateway
-    restart: unless-stopped
-    command:
-      - "--port=8080"
-      - "--transport=http"
-      - "--servers=docker"
-      - "--verbose"
-    ports:
-      - "18080:8080"
-    volumes:
-      # Docker-in-Docker対応: Docker socketとDocker CLIバイナリ
-      - /var/run/docker.sock:/var/run/docker.sock:rw
-      - /home/linuxbrew/.linuxbrew/bin/docker:/usr/bin/docker:ro
-      # 設定ディレクトリ
-      - ./dev/data/gateway-config:/app/config
-      - ./dev/data/gateway-logs:/app/logs
-    environment:
-      - DOCKER_HOST=unix:///var/run/docker.sock
-      - DOCKER_API_VERSION=1.40
-    # Docker-in-Docker権限設定
-    privileged: true
-    user: "root"
-    # ネットワーク設定
-    networks:
-      - mcp-network
-    # 改良されたヘルスチェック
-    healthcheck:
-      test: ["CMD-SHELL", "curl -f http://localhost:8080/health 2>/dev/null || wget -q --spider http://localhost:8080/health 2>/dev/null || exit 1"]
-      interval: 60s
-      timeout: 30s
-      retries: 5
-      start_period: 120s
 
   # MCPサーバーサービス
   mcp-simple:

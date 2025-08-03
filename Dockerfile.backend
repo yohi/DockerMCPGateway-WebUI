@@ -29,6 +29,12 @@ RUN npx tsc --project tsconfig.server.json
 # 本番ステージ
 FROM base AS runner
 
+# Docker CLIとPython関連ツールをインストール
+RUN apk add --no-cache docker-cli python3 py3-pip
+
+# uvx (旧pipx) をインストール
+RUN pip3 install --break-system-packages uv
+
 # 非rootユーザーを作成
 RUN addgroup --system --gid 1001 nodejs && \
     adduser --system --uid 1001 backend
@@ -40,9 +46,19 @@ COPY --from=deps --chown=backend:nodejs /app/node_modules ./node_modules
 COPY --from=builder --chown=backend:nodejs /app/dist ./dist
 COPY --from=builder --chown=backend:nodejs /app/package.json ./package.json
 
+# npm設定を調整
+RUN npm config set prefix /app/.npm-global
+
+# MCPサーバーパッケージをグローバルインストール
+RUN npm install -g @playwright/mcp @modelcontextprotocol/server-filesystem
+
+# 環境設定
+RUN echo 'export PATH=/app/.npm-global/bin:$PATH' >> /home/backend/.profile && \
+    echo 'export PATH=/home/backend/.local/bin:$PATH' >> /home/backend/.profile
+
 # 必要なディレクトリを作成
-RUN mkdir -p /app/config && \
-    chown -R backend:nodejs /app/config
+RUN mkdir -p /app/config /app/workspace /app/.npm-global && \
+    chown -R backend:nodejs /app/config /app/workspace /app/.npm-global
 
 USER backend
 
@@ -52,6 +68,7 @@ EXPOSE 5311
 # 環境変数の設定
 ENV NODE_ENV=production
 ENV PORT=5311
+ENV PATH=/app/.npm-global/bin:/home/backend/.local/bin:$PATH
 
 # サーバーを起動
 CMD ["node", "dist/server/server.js"]

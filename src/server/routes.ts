@@ -45,6 +45,15 @@ router.post('/servers/:id/test', async (req: Request, res: Response) => {
   await serverService.testServer(req, res);
 });
 
+router.get('/servers/:serverId/capabilities', async (req: Request, res: Response) => {
+  await serverService.getServerCapabilities(req, res);
+});
+
+// サーバーヘルスチェックAPI
+router.get('/servers/:serverId/health', async (req: Request, res: Response) => {
+  await serverService.checkServerHealth(req, res);
+});
+
 // グローバル設定管理API
 router.get('/config', async (req: Request, res: Response) => {
   try {

@@ -99,3 +99,6 @@ pnpm-lock.yaml
 # Docker関連
 .dockerignore.bak
 docker-compose.override.yml
+
+# 設定ファイル
+config/config.json

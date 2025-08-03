@@ -1,4 +1,31 @@
-# Docker MCP Gateway 設定
-# 利用可能なサーバーを明示的に指定
+# MCP Gateway Configuration
+# Docker MCP Gateway Web UI用の基本設定
+
+# サーバー設定
 servers:
-  - docker
+  docker:
+    enabled: true
+
+# ネットワーク設定
+network:
+  block_forbidden_resources: false
+
+# ログ設定
+logging:
+  level: info
+  calls: true
+
+# セキュリティ設定
+security:
+  block_secrets: false
+  verify_signatures: false
+
+# リソース制限
+resources:
+  cpus: 1
+  memory: "1Gb"
+
+# トランスポート設定
+transport:
+  type: "http"
+  port: 8080

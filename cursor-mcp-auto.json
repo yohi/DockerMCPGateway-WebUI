@@ -1,0 +1,23 @@
+{
+  "description": "Docker MCP Gateway - 自動サービス管理版（個別設定不要）",
+  "mcpServers": {
+    "docker-mcp-gateway-auto": {
+      "description": "MCP Gateway with automatic service discovery - no manual configuration needed",
+      "command": "docker",
+      "args": [
+        "exec",
+        "-i",
+        "mcp-gateway",
+        "/docker-mcp",
+        "gateway",
+        "run",
+        "--transport",
+        "stdio"
+      ],
+      "env": {
+        "DOCKER_HOST": "unix:///run/user/1000/docker.sock",
+        "MCP_GATEWAY_CONTAINER": "mcp-gateway"
+      }
+    }
+  }
+}
